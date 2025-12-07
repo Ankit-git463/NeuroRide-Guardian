@@ -1,174 +1,97 @@
-# Vehicle Maintenance Predictor
+# NeuroRide Guardian
+**AI-Powered Vehicle Maintenance & Safety System**
 
 ## 📌 Project Overview
-The **Vehicle Maintenance Predictor** is an AI-powered web application designed to predict whether a vehicle requires maintenance based on various operational parameters. It utilizes a machine learning model (Random Forest) to analyze sensor data and usage metrics, providing actionable insights to fleet managers and vehicle owners.
+**NeuroRide Guardian** is an advanced predictive maintenance system designed to enhance vehicle safety and reliability. By leveraging machine learning (Random Forest) and Generative AI (Gemini), it analyzes vehicle telemetry to predict maintenance needs, identify risk factors, and generate detailed, human-readable technical reports.
 
-The system is built using a **Microservices Architecture**, consisting of:
-1.  **Gateway Service**: Entry point that orchestrates requests.
-2.  **Validation Service**: Handles data validation and risk analysis.
-3.  **Prediction Service**: Manages the ML model and inference.
-4.  **Frontend**: A modern, responsive dashboard.
+The system is built on a robust **Microservices Architecture**, ensuring scalability and modularity.
 
-## 🚀 Features
-- **Predictive Analysis**: Uses a pre-trained Random Forest Classifier to predict maintenance needs with high accuracy.
-- **Real-time Validation**: robust input validation system that checks values against defined safety thresholds (e.g., tire pressure, oil quality).
-- **Risk Factor Identification**: Automatically identifies and highlights specific risk factors (e.g., "Critical battery status", "Low tire pressure") even if immediate maintenance isn't predicted.
-- **Modern UI/UX**: A responsive, professional dashboard interface featuring:
-  - Real-time form validation feedback.
-  - Dynamic result visualization.
-  - Mobile-friendly design using Bootstrap 5.
-  - Custom "Glassmorphism" inspired aesthetics.
+## 🚀 Key Features
+- **🔮 Predictive Maintenance**: Accurately predicts if maintenance is required based on usage, load, and sensor data.
+- **⚡ AI-Powered Reports**: Generates detailed, professional maintenance reports with actionable recommendations using Google Gemini AI.
+- **🛡️ Risk Analysis**: Automatically flags critical issues (e.g., "Brake Condition Poor", "Low Oil Quality") even if the overall prediction is safe.
+- **📊 Interactive Dashboard**: A modern, responsive web interface with real-time feedback and dynamic visualizations.
+- **📄 PDF Export**: Ability to generate and print comprehensive maintenance reports for record-keeping.
+- **💾 State Persistence**: Automatically saves analysis results, allowing users to navigate away and return without losing data.
 
 ## 🛠️ Tech Stack
 
-### Backend
-- **Python 3.x**: Core programming language.
-- **Flask**: Lightweight WSGI web application framework.
-- **scikit-learn**: Machine learning library for model inference.
-- **Pandas/NumPy**: Data manipulation and processing.
-- **Joblib**: Model serialization/deserialization.
+### Backend (Microservices)
+- **Gateway Service (Flask)**: Orchestrates requests between frontend and backend services.
+- **Core Engine (Flask + Scikit-Learn)**: Handles data validation and runs the Random Forest prediction model.
+- **LLM Service (Flask + Google Gemini)**: Generates natural language summaries and detailed technical reports.
 
 ### Frontend
-- **HTML5**: Semantic markup.
-- **CSS3 & Bootstrap 5**: Responsive styling and layout.
-- **JavaScript (ES6+)**: Client-side logic and API integration.
-- **Google Fonts**: Typography (Inter font family).
+- **HTML5 / CSS3 / JavaScript**: Core web technologies.
+- **Bootstrap 5**: Responsive layout and components.
+- **Marked.js**: Markdown rendering for AI reports.
 
 ## 📂 Project Structure
 
 ```
 maintenance-predictor/
 ├── microservices/
-│   ├── gateway/               # Orchestrator Service (Port 5000)
-│   │   ├── app.py
-│   │   └── requirements.txt
-│   ├── validation/            # Validation Logic (Port 5001)
-│   │   ├── app.py
-│   │   ├── thresholds.py
-│   │   └── requirements.txt
-│   └── prediction/            # ML Inference (Port 5002)
-│       ├── app.py
-│       ├── model_loader.py
-│       ├── maintenance_rf_model.pkl
-│       └── requirements.txt
+│   ├── gateway/               # Entry Point (Port 5000)
+│   ├── core_engine/           # Validation & Prediction (Port 5001)
+│   └── llm_service/           # AI Report Generation (Port 5002)
 │
 ├── frontend/
-│   ├── index.html             # Main dashboard interface
-│   ├── script.js              # Frontend logic
-│   └── style.css              # Styling
+│   ├── index.html             # Dashboard
+│   ├── report.html            # Detailed Report View
+│   ├── script.js              # Logic & API Integration
+│   └── style.css              # Custom Styling
 │
-└── README.md                  # Project documentation
+└── run_services.py            # Helper script to launch all services
 ```
 
 ## ⚙️ Setup & Installation
 
 ### Prerequisites
-- Python 3.8 or higher installed.
-- A modern web browser.
+- Python 3.8+
+- Google Gemini API Key (for AI reports)
 
-### Microservices Setup
-You can run all services at once using the provided helper script:
-
-```bash
-python run_services.py
-```
-
-This will open three separate terminal windows, one for each service (Validation, Prediction, and Gateway).
-
-Alternatively, to run them manually:
-
-**Terminal 1: Validation Service**
-```bash
-cd microservices/validation
-pip install -r requirements.txt
-python app.py
-# Runs on http://localhost:5001
-```
-
-**Terminal 2: Prediction Service**
-```bash
-cd microservices/prediction
-pip install -r requirements.txt
-python app.py
-# Runs on http://localhost:5002
-```
-
-**Terminal 3: Gateway Service**
-```bash
-cd microservices/gateway
-pip install -r requirements.txt
-python app.py
-# Runs on http://localhost:5000
-```
-
-### Frontend Setup
-1.  Navigate to the frontend directory:
+### Quick Start
+1.  **Clone the repository**:
     ```bash
-    cd frontend
+    git clone https://github.com/Ankit-git463/NeuroRide-Guardian.git
+    cd NeuroRide-Guardian
     ```
-2.  Open `index.html` in your web browser.
-    *   You can simply double-click the file, or use a live server extension in VS Code.
+
+2.  **Set API Key**:
+    Set your Gemini API key as an environment variable:
+    ```bash
+    # Windows (PowerShell)
+    $env:GEMINI_API_KEY="your_api_key_here"
+    ```
+
+3.  **Run Services**:
+    Use the helper script to start all microservices simultaneously:
+    ```bash
+    python run_services.py
+    ```
+    *This will launch the Gateway (5000), Core Engine (5001), and LLM Service (5002).*
+
+4.  **Launch Frontend**:
+    Open `frontend/index.html` in your browser (or serve it using a simple HTTP server).
 
 ## 📖 Usage Guide
 
-1.  **Launch the App**: Ensure the backend server is running and open the frontend in your browser.
-2.  **Input Data**: Fill in the vehicle parameters in the form.
-    *   **Year of Manufacture**: e.g., 2020
-    *   **Usage Hours**: Total hours of operation.
-    *   **Load Capacity**: Maximum allowed load.
-    *   **Actual Load**: Current load carried.
-    *   **Tire Pressure**: Current PSI reading.
-    *   **Battery Status**: Percentage charge (0-100).
-    *   **Oil Quality**: Rating from 1 (Poor) to 10 (Excellent).
-    *   **Brake Condition**: Poor, Fair, or Good.
-3.  **Predict**: Click the "Predict Maintenance Need" button.
-4.  **View Results**:
-    *   **Status**: "Maintenance Required" (Red) or "No Maintenance Needed" (Green).
-    *   **Confidence**: The model's certainty percentage.
-    *   **Risk Factors**: Specific issues detected (e.g., "Very low tire pressure").
-    *   **Recommendation**: Actionable advice based on the prediction.
-
-## 🔍 Validation & Thresholds
-The system enforces strict data validation to ensure reliable predictions. These rules are defined in `backend/thresholds.py`.
-
-| Parameter | Min | Max | Risk Thresholds |
-|-----------|-----|-----|-----------------|
-| Usage Hours | 0 | 50,000 | > 8,000 (High), > 10,000 (Very High) |
-| Tire Pressure | 0 | 100 | < 30 (Low), < 28 (Very Low) |
-| Oil Quality | 0 | 10 | < 6 (Poor), < 4 (Very Poor) |
-| Battery Status | 0 | 100 | < 70% (Low), < 60% (Critical) |
-
-*Note: Inputs outside the Min/Max range will trigger a validation error and prevent prediction.*
+1.  **Dashboard**: Enter vehicle details (Year, Usage, Load, Tire Pressure, etc.).
+2.  **Predict**: Click "Predict Maintenance Need".
+3.  **Analyze**: View the immediate status (Maintenance Required/Not) and specific risk factors.
+4.  **Generate Report**: Click "Generate Detailed AI Report" to get a comprehensive analysis.
+5.  **Full View**: Click "Show Full Report" to see the detailed breakdown, including technical comparisons and prioritized actions.
+6.  **Print**: Use the print button on the report page to save as PDF.
 
 ## 🔌 API Endpoints
 
-### `GET /`
-Returns the API status and version.
-
-### `GET /health`
-Health check endpoint to verify if the model is loaded and server is ready.
-
-### `POST /predict`
-Main prediction endpoint.
-- **Body**: JSON object containing vehicle features.
-- **Response**:
-  ```json
-  {
-    "maintenance_required": 1,
-    "confidence": 95.5,
-    "probability": 0.955,
-    "risk_factors": ["Low tire pressure (28 PSI)"]
-  }
-  ```
-- **Error Response (400)**:
-  ```json
-  {
-    "error": "Validation failed: Tire Pressure: Value -5 is below minimum 0",
-    "details": ["Tire Pressure: Value -5 is below minimum 0"]
-  }
-  ```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/predict` | Validates input and returns maintenance prediction + risk factors. |
+| `POST` | `/report` | Generates a detailed AI maintenance report based on vehicle data. |
+| `GET`  | `/health` | Checks the health status of the backend services. |
 
 ## 🧠 Model Details
 - **Algorithm**: Random Forest Classifier.
-- **Input Features**: The model expects 18+ features, including vehicle type, operational metrics, and maintenance history.
-- **Handling Missing Data**: The backend (`model_loader.py`) automatically handles missing non-critical features by filling them with default values (0) to ensure the model always receives the expected input shape.
+- **Training**: Trained on synthetic vehicle telemetry data covering various failure modes.
+- **Validation**: Strict physics-based thresholds ensure inputs are realistic before prediction.
