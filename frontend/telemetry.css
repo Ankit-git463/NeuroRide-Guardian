@@ -1,0 +1,407 @@
+/* Telemetry Dashboard Styles */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+body {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+.dashboard-container {
+    padding: 2rem;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a202c;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Live Indicator */
+.live-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35em 0.8em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #22543d;
+    background-color: #c6f6d5;
+    border-radius: 9999px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    box-shadow: 0 0 0 1px rgba(72, 187, 120, 0.2);
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #48bb78;
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% {
+        box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 6px rgba(72, 187, 120, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(72, 187, 120, 0);
+    }
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 1400px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--hover-shadow);
+}
+
+.stat-card .icon-wrapper {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    opacity: 0.1;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover .icon-wrapper {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 0.15;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+    line-height: 1;
+    z-index: 1;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    z-index: 1;
+}
+
+/* Specific Card Colors */
+.stat-card.total {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+    border-bottom: 4px solid #3b82f6;
+}
+
+.stat-card.total .stat-value {
+    color: #1e40af;
+}
+
+.stat-card.total .icon-wrapper {
+    background: #3b82f6;
+    color: #1e40af;
+}
+
+.stat-card.critical {
+    background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
+    border-bottom: 4px solid #ef4444;
+}
+
+.stat-card.critical .stat-value {
+    color: #991b1b;
+}
+
+.stat-card.critical .icon-wrapper {
+    background: #ef4444;
+    color: #991b1b;
+}
+
+.stat-card.warning {
+    background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+    border-bottom: 4px solid #f59e0b;
+}
+
+.stat-card.warning .stat-value {
+    color: #92400e;
+}
+
+.stat-card.warning .icon-wrapper {
+    background: #f59e0b;
+    color: #92400e;
+}
+
+.stat-card.good {
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    border-bottom: 4px solid #22c55e;
+}
+
+.stat-card.good .stat-value {
+    color: #166534;
+}
+
+.stat-card.good .icon-wrapper {
+    background: #22c55e;
+    color: #166534;
+}
+
+.stat-card.vehicles {
+    background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%);
+    border-bottom: 4px solid #8b5cf6;
+}
+
+.stat-card.vehicles .stat-value {
+    color: #5b21b6;
+}
+
+.stat-card.vehicles .icon-wrapper {
+    background: #8b5cf6;
+    color: #5b21b6;
+}
+
+.stat-card.oil {
+    background: linear-gradient(135deg, #ffffff 0%, #ecfeff 100%);
+    border-bottom: 4px solid #06b6d4;
+}
+
+.stat-card.oil .stat-value {
+    color: #155e75;
+}
+
+.stat-card.oil .icon-wrapper {
+    background: #06b6d4;
+    color: #155e75;
+}
+
+
+/* Main Content Layout */
+.content-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 992px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Filter Panel */
+.filter-panel {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+    height: fit-content;
+    position: sticky;
+    top: 1rem;
+}
+
+.filter-panel h5 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #374151;
+}
+
+/* Charts & Table Area */
+.main-area {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Telemetry Cards (Grid Item generated by JS) */
+.telemetry-card {
+    border: none;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    height: 100%;
+    background: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.telemetry-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+}
+
+.telemetry-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.telemetry-card.critical::before {
+    background: #ef4444;
+}
+
+.telemetry-card.warning::before {
+    background: #f59e0b;
+}
+
+.telemetry-card.good::before {
+    background: #22c55e;
+}
+
+.telemetry-card.critical {
+    background: linear-gradient(160deg, #fff 40%, #fef2f2 100%);
+}
+
+.telemetry-card.warning {
+    background: linear-gradient(160deg, #fff 40%, #fffbeb 100%);
+}
+
+.telemetry-card.good {
+    background: linear-gradient(160deg, #fff 40%, #f0fdf4 100%);
+}
+
+.telemetry-card .card-body {
+    padding: 1.5rem;
+}
+
+/* Override Metrics Badges from JS */
+.metric-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: 100%;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.metric-badge.bg-success {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+}
+
+.metric-badge.bg-warning {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+}
+
+.metric-badge.bg-danger {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+}
+
+/* Status Badges */
+.telemetry-card .badge {
+    padding: 0.5em 0.8em;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+.telemetry-card .badge.bg-success {
+    background: #dcfce7 !important;
+    color: #166534 !important;
+}
+
+.telemetry-card .badge.bg-warning {
+    background: #fef9c3 !important;
+    color: #854d0e !important;
+}
+
+.telemetry-card .badge.bg-danger {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+}

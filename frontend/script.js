@@ -6,14 +6,16 @@ let lastPredictionResult = null;
 
 // Load state on page load
 window.addEventListener('load', async () => {
-    // Health Check
-    try {
-        const response = await fetch(`${API_URL}/health`);
-        const data = await response.json();
-        console.log('Backend health check:', data);
-    } catch (error) {
-        console.error('Backend connection failed:', error);
-    }
+    // Health Check (non-blocking)
+    setTimeout(async () => {
+        try {
+            const response = await fetch(`${API_URL}/health`);
+            const data = await response.json();
+            console.log('Backend health check:', data);
+        } catch (error) {
+            console.error('Backend connection failed:', error);
+        }
+    }, 100); // Delay health check to avoid blocking page load
 
     // Check navigation type to handle "Clear on Refresh"
     // Using performance.getEntriesByType("navigation") for modern browsers
@@ -32,6 +34,7 @@ window.addEventListener('load', async () => {
         localStorage.removeItem('lastPredictionResult');
         localStorage.removeItem('lastSummary');
         localStorage.removeItem('maintenanceReport');
+        localStorage.removeItem('formValues'); // Clear form values too
         
         // Ensure UI is in initial state
         document.getElementById('guidelines').style.display = 'block';
@@ -43,6 +46,26 @@ window.addEventListener('load', async () => {
     const savedResult = localStorage.getItem('lastPredictionResult');
     const savedData = localStorage.getItem('lastPredictionData');
     const savedSummary = localStorage.getItem('lastSummary');
+    const savedFormValues = localStorage.getItem('formValues');
+    
+    // Restore form values asynchronously (non-blocking)
+    if (savedFormValues) {
+        setTimeout(() => {
+            try {
+                const formValues = JSON.parse(savedFormValues);
+                const form = document.getElementById('predictionForm');
+                
+                for (const [name, value] of Object.entries(formValues)) {
+                    const input = form.elements[name];
+                    if (input && input.value !== value) { // Only update if different
+                        input.value = value;
+                    }
+                }
+            } catch (error) {
+                console.error('Error restoring form values:', error);
+            }
+        }, 0); // Defer to next event loop
+    }
     
     if (savedResult && savedData) {
         lastPredictionResult = JSON.parse(savedResult);
@@ -89,11 +112,16 @@ document.getElementById('predictionForm').addEventListener('submit', async funct
     // Collect form data
     const formData = new FormData(e.target);
     const data = {};
+    const formValues = {}; // Store raw form values for restoration
     
     // Convert form data to proper format
     for (let [key, value] of formData.entries()) {
+        formValues[key] = value; // Save original value
         data[key] = parseFloat(value) || 0;
     }
+    
+    // Save form values to localStorage
+    localStorage.setItem('formValues', JSON.stringify(formValues));
     
     // Add default values
     data.maintenance_cost = 500;
@@ -170,7 +198,10 @@ document.getElementById('predictionForm').addEventListener('submit', async funct
 
 function displayResults(result) {
     const resultsDiv = document.getElementById('results');
-    const needsMaintenance = result.maintenance_required === 1;
+    
+    // Apply 60% confidence threshold
+    const confidence = result.confidence || 0;
+    const needsMaintenance = (result.maintenance_required === 1 && confidence > 60);
     
     let html = `
         <div class="result-card ${needsMaintenance ? 'maintenance-required' : 'maintenance-not-required'}">
@@ -180,9 +211,12 @@ function displayResults(result) {
     `;
     
     if (result.risk_factors && result.risk_factors.length > 0) {
+        // Show "Minor Warnings" if maintenance not required, otherwise "Risk Factors"
+        const sectionTitle = needsMaintenance ? 'Risk Factors:' : 'Minor Warnings:';
+        
         html += `
             <div class="risk-factors">
-                <h3>Risk Factors:</h3>
+                <h3>${sectionTitle}</h3>
                 <ul>
                     ${result.risk_factors.map(factor => `<li>${factor}</li>`).join('')}
                 </ul>
@@ -291,6 +325,10 @@ document.getElementById('btnClear').addEventListener('click', function() {
     localStorage.removeItem('lastPredictionResult');
     localStorage.removeItem('lastSummary');
     localStorage.removeItem('maintenanceReport');
+    localStorage.removeItem('formValues'); // Clear form values
+    
+    // Reset form to default values
+    document.getElementById('predictionForm').reset();
     
     // Reset UI to Guidelines
     document.getElementById('guidelines').style.display = 'block';
