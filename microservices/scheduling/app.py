@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 import logging
 import uuid
 import math
+import random
 
 # Add project root to path (go up two levels from scheduling/)
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,10 +19,14 @@ sys.path.insert(0, project_root)
 from database.models import db, Vehicle, ServiceCenter, Technician, Booking, MaintenanceFlag
 
 # Configure Logging
+log_file = os.path.join(project_root, 'scheduling_service.log')
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s',
-    handlers=[logging.StreamHandler(sys.stdout)]
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler(log_file)
+    ]
 )
 logger = logging.getLogger('SchedulingService')
 
@@ -127,11 +132,18 @@ def get_available_slots(center_id, start_date, end_date):
     slot_duration = timedelta(minutes=SCHEDULING_CONFIG['slot_duration_minutes'])
     
     # Parse operating hours
-    start_hour, start_min = map(int, center.operating_hours_start.split(':'))
-    end_hour, end_min = map(int, center.operating_hours_end.split(':'))
-    
+    try:
+        start_hour, start_min = map(int, center.operating_hours_start.split(':'))
+        end_hour, end_min = map(int, center.operating_hours_end.split(':'))
+    except Exception as e:
+        logger.error(f"Error parsing operating hours for center {center_id}: {e}")
+        return []
+
+    logger.info(f"Checking slots for {center_id} from {start_date} to {end_date}. Ops: {start_hour}:{start_min}-{end_hour}:{end_min}")
+
     while current_time < end_date:
         # Check if within operating hours
+        # logger.info(f"Checking time: {current_time}") 
         if (current_time.hour > start_hour or 
             (current_time.hour == start_hour and current_time.minute >= start_min)) and \
            (current_time.hour < end_hour or 
@@ -146,17 +158,18 @@ def get_available_slots(center_id, start_date, end_date):
             # Check if capacity available
             if concurrent_bookings < center.capacity_bays:
                 available_slots.append(current_time)
+            else:
+                 logger.info(f"Slot {current_time} full. {concurrent_bookings}/{center.capacity_bays}")
         
         current_time += slot_duration
         
         # Move to next day if past operating hours
         if current_time.hour >= end_hour:
-            current_time = current_time.replace(
-                day=current_time.day + 1,
+            # Safely move to next day using timedelta
+            next_day_date = current_time.date() + timedelta(days=1)
+            current_time = datetime.combine(next_day_date, datetime.min.time()).replace(
                 hour=start_hour,
-                minute=start_min,
-                second=0,
-                microsecond=0
+                minute=start_min
             )
     
     return available_slots
@@ -203,10 +216,12 @@ def create_provisional_booking(vehicle_id, center_id, slot_start, priority_score
         priority_score=priority_score,
         severity_level=severity_level,
         service_type=service_type,
-        estimated_duration_minutes=SCHEDULING_CONFIG['slot_duration_minutes']
+        estimated_duration_minutes=SCHEDULING_CONFIG['slot_duration_minutes'],
+        created_at=datetime.utcnow()
     )
     
     db.session.add(booking)
+    db.session.flush()
     return booking
 
 @app.route('/health', methods=['GET'])
@@ -300,6 +315,11 @@ def schedule_batch():
                 
                 # Find nearest service center (simplified - use first available)
                 centers = ServiceCenter.query.filter_by(is_active=True).all()
+                random.shuffle(centers)
+                
+                if not centers:
+                   failed_vehicles.append({'vehicle_id': vehicle_id, 'reason': 'No active service centers found in database'})
+                   continue
                 
                 booking_created = False
                 for center in centers:

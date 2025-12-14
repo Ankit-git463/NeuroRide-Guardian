@@ -1,151 +1,153 @@
 # NeuroRide Guardian
+**AI-Powered Predictive Maintenance & Scheduling System**
 
-**AI-Powered Vehicle Maintenance and Scheduling System**
+![NeuroRide Guardian Banner](documentation/screenshots/S1-NueroRide%20Guardian.png)
 
-NeuroRide Guardian is a comprehensive microservices-based system designed to automate vehicle maintenance, from real-time telemetry ingestion to predictive analysis and appointment scheduling. It leverages machine learning for predictive maintenance and generative AI for creating human-readable technical reports.
+## 1. Executive Summary
 
-![NeuroRide Guardian Dashboard](documentation/screenshots/S1-NueroRide%20Guardian.png)
-
----
-
-## System Flow and Architecture
-
-The system operates through a coordinated workflow of seven distinct microservices, ensuring modularity, scalability, and ease of maintenance.
-
-### 1. Data Ingestion
-The **Telemetry Service** acts as the ingestion point for all vehicle sensor data. It supports both real-time streaming from connected vehicles and bulk CSV imports for historical analysis.
-- **Real-time Processing:** Immediately evaluates incoming telemetry against critical safety thresholds (e.g., Oil Quality below 3.0, dangerously low tire pressure).
-- **Maintenance Flagging:** Automatically generates a "Maintenance Flag" when critical issues are detected, triggering the downstream workflow without human intervention.
-- **Streaming Simulator:** Includes a built-in simulator to generate realistic vehicle behavior for testing and demonstration purposes.
-
-![Telemetry Realtime Data](documentation/screenshots/S6-Telemetry%20Realtime%20Data.png)
-
-### 2. Prediction and Assessment
-When a potential issue is flagged or a user requests a check, the system performs a deep analysis via the **Gateway**.
-- **Core Engine:** Executes a pre-trained Random Forest Machine Learning model to calculate the specific probability of maintenance requirements based on multivariate risk factors.
-- **LLM Service:** Integrates with Google Gemini to synthesize the raw telemetry data and ML confidence scores into a professional, easy-to-understand technical report for the vehicle owner.
-
-![AI Assessment Report](documentation/screenshots/S2-Report.png)
-
-### 3. Forecasting and Planning
-To optimize service center operations, the **Forecasting Service** analyzes data trends.
-- **Demand Prediction:** Uses historical booking data and current active maintenance flags to predict service demand for the upcoming week.
-- **Capacity Analysis:** Calculates the utilization rates of service bays to identify potential bottlenecks or underutilized resources in specific regions.
-
-### 4. Orchestration and Scheduling
-The **Orchestrator** manages the end-to-end automation lifecycle.
-- **Workflow Automation:** Triggers the full maintenance cycle—collecting forecasts, identifying flagged vehicles, and initiating the scheduling process.
-- **Smart Scheduling:** The **Scheduling Service** employs a weighted Priority Algorithm. It assigns appointment slots by considering the severity of the defect, the customer's tier (e.g., Premium vs. Standard), and the geographical proximity to the service center.
-- **Booking Management:** Automatically creates and confirms provisional bookings based on optimal slot availability.
-
-![Booking Management](documentation/screenshots/S5-Booking%20Management.png)
-
-### 5. Notification
-Once an appointment is successfully scheduled, the Orchestrator triggers the notification system to send a confirmation (simulated SMS/Email) to the vehicle owner, completing the automation loop.
+**NeuroRide Guardian** is an enterprise-grade vehicle management system designed to shift maintenance paradigms from *reactive* to *predictive*. By ingesting real-time telemetry data from connected vehicles, the system utilizes Machine Learning to predict component failures before they occur. It further leverages Generative AI (Google Gemini) to transform complex technical data into human-readable reports and automatically schedules service appointments based on urgency, customer tier, and service center capacity.
 
 ---
 
-## Service Documentation
+## 2. Key Features
 
-Detailed technical documentation for each microservice is available below:
+- **📡 Real-time Telemetry Ingestion**: Handles live data streams from vehicles (speed, engine load, oil quality, brake wear, tire pressure). Includes a robust **Simulator** for testing and demos.
+- **🧠 Predictive Maintenance Engine**: Uses a **Random Forest Machine Learning** model to analyze multivariate risk factors and flag potential failures with high, medium, or low confidence scores.
+- **🤖 Generative AI Reporting**: Integrates with **Google Gemini (LLM)** to generate comprehensive, easy-to-understand maintenance reports for vehicle owners, explaining *why* maintenance is needed.
+- **📅 Smart Scheduling**: An automated orchestration system that assigns appointment slots using a weighted priority algorithm (considering severity, customer value, and location).
+- **📈 Demand Forecasting**: Analyzes historical trends and active maintenance flags to predict future service center utilization and identify capacity bottlenecks.
+- **📊 Interactive Dashboards**: A suite of frontend dashboards for Vehicle Owners, Administrators, and Service Staff.
 
-| Service | Port | Description | Documentation |
+---
+
+## 3. System Architecture
+
+The project is built on a modular **Microservices Architecture**, ensuring scalability and isolation of concerns.
+
+### Microservices Breakdown
+
+| Service | Port | Role | Description |
 | :--- | :--- | :--- | :--- |
-| **Gateway** | 5000 | Main API Entry Point | [View Docs](documentation/services/gateway.md) |
-| **Core Engine** | 5001 | ML Prediction and Validation | [View Docs](documentation/services/core_engine.md) |
-| **LLM Service** | 5002 | AI Report Generation | [View Docs](documentation/services/llm_service.md) |
-| **Scheduling** | 5003 | Appointment Management | [View Docs](documentation/services/scheduling.md) |
-| **Forecasting** | 5004 | Demand Prediction | [View Docs](documentation/services/forecasting.md) |
-| **Orchestrator** | 5005 | Workflow Automation | [View Docs](documentation/services/orchestrator.md) |
-| **Telemetry** | 5006 | Data Ingestion and Simulator | [View Docs](documentation/services/telemetry_ingestion.md) |
+| **Gateway** | `5000` | API Gateway | The central entry point that routes requests to appropriate backend services. |
+| **Core Engine** | `5001` | ML Analysis | Hosts the Scikit-Learn Random Forest model. Validates telemetry and predicts maintenance needs. |
+| **LLM Service** | `5002` | Generator | Interfaces with Google Gemini API to create natural language summary reports. |
+| **Scheduling** | `5003` | Management | Handles logic for finding slots, assigning technicians, and managing bookings. |
+| **Forecasting** | `5004` | Analytics | Predicts weekly service demand based on current fleet health. |
+| **Orchestrator** | `5005` | Automation | The "brain" that connects services. It watches for flags and triggers the scheduling workflow. |
+| **Telemetry** | `5006` | Ingestion | Receives raw sensor data, serves the simulator, and writes to the telemetry history. |
+
+### Database Schema (SQLite)
+
+The system uses a relational schema managed by **SQLAlchemy**:
+- **Vehicles**: Stores static info (VIN, Owner, Model) and dynamic state (Mileage).
+- **Telemetry**: Time-series data for sensor readings.
+- **MaintenanceFlags**: Risks identified by the ML engine (Severity Score, Risk Factors).
+- **ServiceCenters & Technicians**: Capacity planning resources.
+- **Bookings**: The end result of the automation—a scheduled appointment.
 
 ---
 
-## Setup Guide
+## 4. Technical Stack
 
-Follow these steps to deploy the system locally.
+*   **Backend**: Python 3.8+, Flask (Microservices), Flask-CORS.
+*   **Database**: SQLite, SQLAlchemy ORM.
+*   **AI & ML**: 
+    *   **Scikit-Learn**: Predictive modeling.
+    *   **Google Generative AI**: Text generation.
+*   **Frontend**: HTML5, CSS3, JavaScript (ES6+), Bootstrap 5, Chart.js.
+*   **Protocols**: HTTP/REST for inter-service communication.
 
-### 1. Prerequisites
-- **Python 3.8 or higher**
-- **Google Gemini API Key** (Optional, required only for AI Report features)
+---
 
-### 2. Installation
-Install the necessary Python dependencies using pip:
+## 5. and Setup Guide
+
+### Prerequisites
+*   Python 3.8 or higher
+*   (Optional) Google Gemini API Key
+
+### Step 1: Installation
+Install required dependencies:
+
 ```bash
 pip install Flask Flask-CORS Flask-SQLAlchemy requests google-generativeai scikit-learn
 ```
 
-### 3. Database Initialization
-Initialize the SQLite database and populate it with seed data (vehicles, service centers, and technicians):
+### Step 2: Database Initialization
+Populate the database with seed data (vehicles, centers, techs):
+
 ```bash
 python database/seed_data.py
 ```
 
-### 4. Configuration
-To enable the AI Report generation capabilities, set your Google Gemini API key as an environment variable:
+### Step 3: API Key Configuration
+Set your Gemini API key for AI reporting features:
 
-**Windows PowerShell:**
-```powershell
-$env:GEMINI_API_KEY='your_api_key_here'
-```
+*   **Windows (PowerShell):** `$env:GEMINI_API_KEY='your_key'`
+*   **Linux/Mac:** `export GEMINI_API_KEY='your_key'`
 
-**Linux/Mac:**
-```bash
-export GEMINI_API_KEY='your_api_key_here'
-```
-
-### 5. Running the System
-Use the unified service manager script to launch all microservices simultaneously. This script will spawn separate console windows for each service and monitor their health.
+### Step 4: Running the Backend
+Start all microservices using the unified manager:
 
 ```bash
 python run_services.py
 ```
 
----
+### Step 5: Running the Frontend
+Serve the static frontend files:
 
-## Frontend Dashboards
-
-Access the user interfaces via your web browser:
-
-### Main Dashboard
-**URL:** `frontend/index.html`
-The primary interface for vehicle owners and service advisors to input telemetry manually, trigger predictions, and view the AI-generated assessment reports.
-
-### Admin Dashboard
-**URL:** `frontend/admin.html`
-A control center for system administrators. From here, you can start/stop the telemetry simulator, trigger the orchestration workflow, and view system-wide analytics and forecasts.
-
-![Admin Dashboard](documentation/screenshots/S3-AdminPage.png)
-
-### Simulator and Telemetry Controls
-**Accessed via Admin Dashboard**
-Monitor the ingestion of real-time data streams and visualize the status of the connected vehicle fleet.
-
-![Telemetry Simulator](documentation/screenshots/S4-Telemetry%20Simulator.png)
-
-### Bookings Management
-**URL:** `frontend/bookings.html`
-A dedicated interface for service center staff to view, filter, and manage scheduled service appointments.
+```bash
+python -m http.server 8000 --directory frontend
+```
 
 ---
 
-## Project Structure
+## 6. User Manual & Workflow
+
+### 1. View the System (Dashboard)
+Navigate to `http://localhost:8000/index.html`. This is the user-facing portal to check vehicle status.
+
+### 2. Generate Data (Admin)
+Go to `http://localhost:8000/admin.html`:
+*   Click **"Start Simulator"** to begin generating fake telemetry for the fleet.
+*   Watch data flow in the **Telemetry** page (`/telemetry.html`).
+
+### 3. Automated Analysis
+As data comes in, the **Telemetry Service** checks for critical thresholds (e.g., Oil < 3.0).
+*   If a risk is found, a **Maintenance Flag** is created.
+*   The **Core Engine** validates the risk using the ML model.
+
+### 4. Orchestration
+On the **Admin Dashboard**, click **"Run Full Automation Cycle"**.
+*   The **Orchestrator** picks up unscheduled flags.
+*   It calls **Scheduling Service** to find the best slot based on priority.
+*   It calls **LLM Service** to generate a report.
+*   Finally, it confirms the booking.
+
+### 5. Review Results
+*   **Bookings**: See the newly created appointment in `bookings.html`.
+*   **Reports**: View the AI-generated explanation in `report.html` (linked from the booking).
+
+---
+
+## 7. Project Structure
 
 ```
 maintenance-predictor/
-├── documentation/       # Detailed service documentation and screenshots
-│   ├── services/        # Markdown docs for individual services
-│   └── screenshots/     # System screenshots
-├── microservices/       # Source code for all 7 microservices
-│   ├── gateway/
-│   ├── core_engine/
-│   ├── llm_service/
-│   ├── scheduling/
-│   ├── forecasting/
-│   ├── orchestrator/
-│   └── telemetry_ingestion/
-├── frontend/            # HTML/JS/CSS Dashboards
-├── database/            # Database models and seed scripts
-├── run_services.py      # Unified startup script
-└── README.md            # Project documentation
+├── database/               # Models (models.py) and Seed Data (seed_data.py)
+├── frontend/               # UI Layer
+│   ├── admin.html          # Administrator controls
+│   ├── bookings.html       # Schedule view
+│   ├── index.html          # Main landing
+│   ├── telemetry.html      # Live data feed
+│   └── js/css              # Assets
+├── microservices/          # Application Logic
+│   ├── gateway/            # Port 5000
+│   ├── core_engine/        # Port 5001
+│   ├── llm_service/        # Port 5002
+│   ├── scheduling/         # Port 5003
+│   ├── forecasting/        # Port 5004
+│   ├── orchestrator/       # Port 5005
+│   └── telemetry_ingestion/# Port 5006
+├── run_services.py         # Service Manager
+└── README.md               # This Report
 ```
